@@ -92,7 +92,7 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
 
     else:
         typer.echo("Nothing to store", err=True)
-        typer.Exit(10)
+        raise typer.Exit(10)
 
 
 @cmd.command(name="list", help="Get a list of all stored items")
