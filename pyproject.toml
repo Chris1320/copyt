@@ -39,7 +39,7 @@ version = {attr = "copyt.__version__"}
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cache-clear --color=yes --code-highlight=yes --cov=config_handler -vvv"
+addopts = "--cache-clear --color=yes --code-highlight=yes --cov=copyt -vvv"
 testpaths = [
     "tests"
 ]

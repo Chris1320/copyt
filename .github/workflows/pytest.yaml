@@ -1,5 +1,5 @@
 ---
-name: pylint
+name: pytest
 # yamllint disable-line rule:truthy
 on: [push, pull_request]
 
@@ -22,8 +22,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r pylint
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Analysing the code with pylint
+      - name: Run pytest
         run: |
-          pylint $(git ls-files '*.py')
+          pytest
