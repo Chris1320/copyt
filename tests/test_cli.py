@@ -24,18 +24,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
+
 from typer.testing import CliRunner
 
 from copyt import info as copyt_info
 from copyt._cli_handler import cmd
 
+ENCODING = "utf-8"
+CACHE_PATH = "./tests_data/copyt"
+DB_FILE = os.path.join(CACHE_PATH, "history.db")
+
 cmd_runner = CliRunner()
+
+
+def cleanup_tests_data():
+    """
+    Cleanup the tests data
+    """
+
+    for path in os.listdir("./tests_data"):
+        if path != ".gitinclude":
+            os.remove(os.path.join("./tests_data", path))
 
 
 def test_cli_version():
     """
     Test the version command
     """
+
     result = cmd_runner.invoke(cmd, ["version"])
     assert result.exit_code == 0
     assert (
@@ -44,23 +61,35 @@ def test_cli_version():
     )
 
 
-def test_cli_store_stdin():
+def test_cli_store_text_stdin():
     """
     Store text via stdin
     """
 
+    test_data = "The quick brown fox jumps over the lazy dog."
+
+    cleanup_tests_data()
     result = cmd_runner.invoke(
-        cmd, ["--cache-path", "./tests_data/copyt", "store"], input="foo"
+        cmd, ["--cache-path", CACHE_PATH, "store"], input=test_data
     )
     assert result.exit_code == 0
+    with open(DB_FILE, "r", encoding=ENCODING) as f:
+        assert f.read() == test_data
+
+    cleanup_tests_data()
 
 
-def test_cli_store_arg():
+def test_cli_store_text_arg():
     """
     Store text via argument
     """
 
-    result = cmd_runner.invoke(
-        cmd, ["--cache-path", "./tests_data/copyt", "store", "foo"]
-    )
+    test_data = "Another quick brown fox jumps over the lazy dog."
+
+    cleanup_tests_data()
+    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store", test_data])
     assert result.exit_code == 0
+    with open(DB_FILE, "r", encoding=ENCODING) as f:
+        assert f.read() == test_data
+
+    cleanup_tests_data()
