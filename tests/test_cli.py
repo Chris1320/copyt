@@ -47,7 +47,7 @@ def cleanup_tests_data():
     """
 
     for path in os.listdir("./tests_data"):
-        if path != ".gitinclude":
+        if path not in (".gitinclude", "assets"):
             shutil.rmtree(os.path.join("./tests_data", path))
 
 
@@ -80,6 +80,27 @@ def test_cli_version():
     )
 
 
+def test_cli_store_text_arg():
+    """
+    Store text via argument
+    """
+
+    test_data = "Another quick brown fox jumps over the lazy dog."
+
+    cleanup_tests_data()
+    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store", test_data])
+    assert result.exit_code == 0
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        result = cur.execute(
+            "SELECT value FROM clipboard WHERE key = ?", ("1",)
+        ).fetchone()
+
+        assert decode(result[0])["data"] == test_data
+
+    cleanup_tests_data()
+
+
 def test_cli_store_text_stdin():
     """
     Store text via stdin
@@ -104,15 +125,18 @@ def test_cli_store_text_stdin():
     cleanup_tests_data()
 
 
-def test_cli_store_text_arg():
+def test_cli_store_image_stdin():
     """
-    Store text via argument
+    Store an image via stdin
     """
 
-    test_data = "Another quick brown fox jumps over the lazy dog."
+    with open("./tests_data/assets/pomeranian-pup.jpg", "rb") as f:
+        test_data = f.read()
 
     cleanup_tests_data()
-    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store", test_data])
+    result = cmd_runner.invoke(
+        cmd, ["--cache-path", CACHE_PATH, "store"], input=test_data
+    )
     assert result.exit_code == 0
     with sqlite3.connect(DB_FILE) as conn:
         cur = conn.cursor()
