@@ -56,8 +56,8 @@ class DBManager:
         Get the maximum index in the database.
         """
 
-        if len(tuple(self._db.keys())) > 0:
-            return max(self._db.keys())
+        if len(tuple(self._db.keys())) > 0:  # type: ignore (we know keys are ints)
+            return max(self._db.keys())  # type: ignore
 
         return 0
 
@@ -97,7 +97,7 @@ class DBManager:
         :return: The contents of the item.
         """
 
-        return self._db[item_id]
+        return self._db[item_id]  # type: ignore
 
     def delete(self, item_id: int) -> None:
         """
@@ -106,6 +106,15 @@ class DBManager:
         """
 
         del self._db[item_id]
+
+    def get_all(self) -> list[tuple[str, str | bytes]]:
+        """
+        Get all items in the database.
+
+        :return: A list of all items.
+        """
+
+        return list(self._db.items())  # type: ignore
 
     def wipe(self) -> None:
         """
