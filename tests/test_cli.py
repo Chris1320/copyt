@@ -25,6 +25,9 @@ SOFTWARE.
 """
 
 import os
+import pickle
+import shutil
+import sqlite3
 
 from typer.testing import CliRunner
 
@@ -45,7 +48,23 @@ def cleanup_tests_data():
 
     for path in os.listdir("./tests_data"):
         if path != ".gitinclude":
-            os.remove(os.path.join("./tests_data", path))
+            shutil.rmtree(os.path.join("./tests_data", path))
+
+
+def encode(data):
+    """
+    How sqlitedict encodes data
+    """
+
+    return sqlite3.Binary(pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL))
+
+
+def decode(data):
+    """
+    How sqlitedict decodes data
+    """
+
+    return pickle.loads(bytes(data))
 
 
 def test_cli_version():
@@ -73,8 +92,14 @@ def test_cli_store_text_stdin():
         cmd, ["--cache-path", CACHE_PATH, "store"], input=test_data
     )
     assert result.exit_code == 0
-    with open(DB_FILE, "r", encoding=ENCODING) as f:
-        assert f.read() == test_data
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        result = cur.execute(
+            "SELECT value FROM clipboard WHERE key = ?", ("1",)
+        ).fetchone()
+
+        # STDIN is encoded as bytes since we can pipe binary data to it.
+        assert decode(result[0])["data"].decode() == test_data
 
     cleanup_tests_data()
 
@@ -89,7 +114,12 @@ def test_cli_store_text_arg():
     cleanup_tests_data()
     result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store", test_data])
     assert result.exit_code == 0
-    with open(DB_FILE, "r", encoding=ENCODING) as f:
-        assert f.read() == test_data
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        result = cur.execute(
+            "SELECT value FROM clipboard WHERE key = ?", ("1",)
+        ).fetchone()
+
+        assert decode(result[0])["data"] == test_data
 
     cleanup_tests_data()
