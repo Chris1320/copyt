@@ -30,11 +30,12 @@ import pathlib
 import sys
 from typing import Optional
 
+import magic
 import typer
 from typing_extensions import Annotated
 
 from copyt import api, helpers, info
-from copyt.global_options import GlobalOptions
+from copyt.models.global_options import GlobalOptions
 
 cmd = typer.Typer()
 global_options: GlobalOptions = GlobalOptions(
@@ -106,10 +107,36 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
     raise typer.Exit(10)
 
 
-@cmd.command(name="list", help="Get a list of all stored items")
-def cmd_list(sep: str = "\t"):
-    # TODO
-    print("command: list")
+@cmd.command(name="list")
+def cmd_list(
+    output_format: Annotated[
+        str,
+        typer.Option(help="Set a custom format of the output."),
+    ] = "[{id}]\t{content}"
+):
+    """
+    Get a list of all stored items
+    """
+
+    copyt_api = api.API(global_options)
+    hist_list = copyt_api.get_history_list()
+    for item_id, data in hist_list:
+        print(
+            # DOCS: document the behavior of this
+            output_format.format(
+                id=item_id,
+                kind=magic.from_buffer(data.content, mime=True),
+                content=magic.from_buffer(data.content)
+                if isinstance(data.content, bytes)
+                else data.content,
+                size=len(data.content),
+                timestamp=data.timestamp.timestamp,
+            )
+        )
+
+    copyt_api.close()
+
+    raise typer.Exit(0)
 
 
 @cmd.command(name="decode", help="Get something from the clipboard")

@@ -115,7 +115,7 @@ def test_cli_store_text_arg():
             "SELECT value FROM clipboard WHERE key = ?", ("1",)
         ).fetchone()
 
-        assert decode(result[0])["data"] == test_data
+        assert decode(result[0]).content == test_data
 
     cleanup_tests_data()
 
@@ -139,7 +139,7 @@ def test_cli_store_text_stdin():
         ).fetchone()
 
         # STDIN is encoded as bytes since we can pipe binary data to it.
-        assert decode(result[0])["data"].decode(ENCODING) == test_data
+        assert decode(result[0]).content.decode(ENCODING) == test_data
 
     cleanup_tests_data()
 
@@ -163,7 +163,7 @@ def test_cli_store_image_stdin():
             "SELECT value FROM clipboard WHERE key = ?", ("1",)
         ).fetchone()
 
-        assert decode(result[0])["data"] == test_data
+        assert decode(result[0]).content == test_data
 
     cleanup_tests_data()
 
@@ -189,7 +189,7 @@ def test_cli_store_multi_text_stdin():
     assert len(db_result) == len(test_data)
     for idx, db_result in enumerate(db_result):
         # checked in the order they were added
-        assert decode(db_result[1])["data"].decode(ENCODING) == test_data[idx]
+        assert decode(db_result[1]).content.decode(ENCODING) == test_data[idx]
 
     cleanup_tests_data()
 
@@ -215,6 +215,6 @@ def test_cli_store_multi_image_stdin():
     for idx, db_result in enumerate(db_result):
         # checked in the order they were added
         with open(IMAGE_FILES[idx], "rb") as f:
-            assert decode(db_result[1])["data"] == f.read()
+            assert decode(db_result[1]).content == f.read()
 
     cleanup_tests_data()

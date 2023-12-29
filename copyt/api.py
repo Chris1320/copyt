@@ -27,7 +27,8 @@ SOFTWARE.
 import pathlib
 
 from copyt import _db_manager
-from copyt.global_options import GlobalOptions
+from copyt.models.clipboard_record import ClipboardRecord
+from copyt.models.global_options import GlobalOptions
 
 
 class API:
@@ -54,35 +55,6 @@ class API:
 
         return pathlib.Path(self.global_options.cache_dir, "history.db")
 
-    def store(self, data: str | bytes) -> int:
-        """
-        Store data to history.
-
-        :param str | bytes data: The data to store.
-        :return: The ID of the item.
-        """
-
-        if len(data) > self.global_options.max_item_size_in_bytes:
-            raise ValueError(
-                "The size of the data is larger than the maximum allowed size"
-            )
-
-        return self.db_manager.add(data)
-
-    def remove_last(self) -> None:
-        """
-        Remove the last item from the history.
-        """
-
-        self.db_manager.delete(self.db_manager.max_index)
-
-    def wipe(self) -> None:
-        """
-        Wipe the history.
-        """
-
-        self.db_manager.wipe()
-
     def commit(self) -> None:
         """
         Commit changes to the database.
@@ -99,3 +71,48 @@ class API:
             self.commit()
 
         self.db_manager.close()
+
+    def store(self, data: str | bytes) -> int:
+        """
+        Store data to history.
+
+        :param str | bytes data: The data to store.
+        :return: The ID of the item.
+        """
+
+        if len(data) > self.global_options.max_item_size_in_bytes:
+            raise ValueError(
+                "The size of the data is larger than the maximum allowed size"
+            )
+
+        return self.db_manager.add(data)
+
+    def remove(self, item_id: int) -> None:
+        """
+        Remove an item from the history.
+
+        :param int item_id: The ID of the item to remove.
+        """
+
+        self.db_manager.delete(item_id)
+
+    def remove_last(self) -> None:
+        """
+        Remove the last item from the history.
+        """
+
+        self.db_manager.delete(self.db_manager.max_index)
+
+    def wipe(self) -> None:
+        """
+        Wipe the history.
+        """
+
+        self.db_manager.wipe()
+
+    def get_history_list(self) -> list[tuple[str, ClipboardRecord]]:
+        """
+        Get a list of all items in the history.
+        """
+
+        return self.db_manager.get_all()

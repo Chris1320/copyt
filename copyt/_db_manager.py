@@ -26,8 +26,11 @@ SOFTWARE.
 
 import os
 import pathlib
+from datetime import datetime
 
 from sqlitedict import SqliteDict
+
+from copyt.models.clipboard_record import ClipboardRecord
 
 
 class DBManager:
@@ -84,12 +87,12 @@ class DBManager:
         """
 
         # PERF: Deduplicate items
+        new_idx = self.max_index + 1
+        self._db[new_idx] = ClipboardRecord(timestamp=datetime.now(), content=data)
 
-        self._db[self.max_index + 1] = {"data": data}
+        return new_idx
 
-        return 1
-
-    def query(self, item_id: int) -> bytes | str:
+    def query(self, item_id: int) -> ClipboardRecord:
         """
         Search the database for an item using its ID.
 
@@ -107,7 +110,7 @@ class DBManager:
 
         del self._db[item_id]
 
-    def get_all(self) -> list[tuple[str, str | bytes]]:
+    def get_all(self) -> list[tuple[str, ClipboardRecord]]:
         """
         Get all items in the database.
 
