@@ -26,6 +26,7 @@ SOFTWARE.
 
 import pathlib
 
+from copyt import _db_manager
 from copyt.global_options import GlobalOptions
 
 
@@ -43,6 +44,7 @@ class API:
         """
 
         self.global_options = global_options
+        self.db_manager = _db_manager.DBManager(self.history_file)
 
     @property
     def history_file(self) -> pathlib.Path:
@@ -52,17 +54,48 @@ class API:
 
         return pathlib.Path(self.global_options.cache_dir, "history.db")
 
-    def store(self, data: str | bytes) -> None:
+    def store(self, data: str | bytes) -> int:
         """
         Store data to history.
+
+        :param str | bytes data: The data to store.
+        :return: The ID of the item.
         """
 
-        if isinstance(data, str):
-            data = data.encode(self.global_options.text_encoding)
+        if len(data) > self.global_options.max_item_size_in_bytes:
+            raise ValueError(
+                "The size of the data is larger than the maximum allowed size"
+            )
 
-        # TODO: This is just a placeholder.
-        with open(self.history_file, "wb") as f:
-            f.write(data)
+        return self.db_manager.add(data)
 
-    def remove(self):
-        pass
+    def remove_last(self) -> None:
+        """
+        Remove the last item from the history.
+        """
+
+        self.db_manager.delete(self.db_manager.max_index)
+
+    def wipe(self) -> None:
+        """
+        Wipe the history.
+        """
+
+        self.db_manager.wipe()
+
+    def commit(self) -> None:
+        """
+        Commit changes to the database.
+        """
+
+        self.db_manager.commit()
+
+    def close(self, commit: bool = False) -> None:
+        """
+        Close the database.
+        """
+
+        if commit:
+            self.commit()
+
+        self.db_manager.close()

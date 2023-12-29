@@ -89,9 +89,11 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
     copyt_api = api.API(global_options)
     if data is not None:
         copyt_api.store(data)
+        copyt_api.close(commit=True)
 
     elif not sys.stdin.buffer.isatty():
         copyt_api.store(sys.stdin.buffer.read())
+        copyt_api.close(commit=True)
 
     else:
         typer.echo("Nothing to store", err=True)
@@ -116,7 +118,14 @@ def cmd_delete(something: Annotated[Optional[str], typer.Argument()] = None):
     print(f"command: delete `{something}` from clipboard")
 
 
-@cmd.command(name="wipe", help="Wipe the clipboard history")
+@cmd.command(name="wipe")
 def cmd_wipe():
-    # TODO
-    print("command: wipe")
+    """
+    Wipe the clipboard history
+    """
+
+    copyt_api = api.API(global_options)
+    copyt_api.wipe()
+    copyt_api.close(commit=True)
+    typer.echo("Wiped the clipboard history.")
+    raise typer.Exit(0)

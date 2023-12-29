@@ -30,6 +30,9 @@ import pathlib
 def get_program_cache_dir(cache_dir: str | pathlib.Path) -> pathlib.Path:
     """
     Make <cache_dir>/<program_cache_dir>
+
+    :param str | pathlib.Path cache_dir: The directory where the cache should be stored.
+    :return: The directory where the program cache is stored.
     """
 
     return pathlib.Path(cache_dir, "copyt")
