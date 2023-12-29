@@ -57,7 +57,7 @@ class DBManager:
         """
 
         if len(tuple(self._db.keys())) > 0:  # type: ignore (we know keys are ints)
-            return max(self._db.keys())  # type: ignore
+            return max(map(int, self._db.keys()))  # type: ignore
 
         return 0
 
