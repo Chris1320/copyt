@@ -40,6 +40,7 @@ cmd = typer.Typer()
 global_options: GlobalOptions = GlobalOptions(
     json=False,
     max_items=750,
+    max_item_size_in_bytes=1024 * 1024 * 5,  # 5MB
     verbose=False,
     cache_dir=helpers.get_program_cache_dir(
         os.getenv("XDG_CACHE_HOME") or pathlib.Path(pathlib.Path.home(), ".cache")
@@ -52,6 +53,7 @@ global_options: GlobalOptions = GlobalOptions(
 def main_callback(
     json: bool = global_options.json,
     max_items: int = global_options.max_items,
+    max_item_size: int = global_options.max_item_size_in_bytes,
     verbose: bool = global_options.verbose,
     cache_path: Optional[str] = None,
     text_encoding: str = global_options.text_encoding,
@@ -62,6 +64,7 @@ def main_callback(
 
     global_options.json = json
     global_options.max_items = max_items
+    global_options.max_item_size_in_bytes = max_item_size
     global_options.verbose = verbose
     global_options.cache_dir = cache_path or global_options.cache_dir
     global_options.text_encoding = text_encoding

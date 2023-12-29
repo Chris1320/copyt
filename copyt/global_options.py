@@ -36,6 +36,7 @@ class GlobalOptions:
 
     json: bool
     max_items: int
+    max_item_size_in_bytes: int
     verbose: bool
     cache_dir: str | pathlib.Path
 
