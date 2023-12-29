@@ -38,6 +38,12 @@ ENCODING = "utf-8"
 CACHE_PATH = "./tests_data/copyt"
 DB_FILE = os.path.join(CACHE_PATH, "history.db")
 
+IMAGE_FILES = [
+    "./tests_data/assets/pomeranian-pup.jpg",
+    "./tests_data/assets/cat-1369563348jT2.jpg",
+    "./tests_data/assets/lighted-match.jpg",
+]
+
 cmd_runner = CliRunner()
 
 
@@ -130,7 +136,7 @@ def test_cli_store_image_stdin():
     Store an image via stdin
     """
 
-    with open("./tests_data/assets/pomeranian-pup.jpg", "rb") as f:
+    with open(IMAGE_FILES[0], "rb") as f:
         test_data = f.read()
 
     cleanup_tests_data()
@@ -171,5 +177,31 @@ def test_cli_store_multi_text_stdin():
     for idx, db_result in enumerate(db_result):
         # checked in the order they were added
         assert decode(db_result[1])["data"].decode(ENCODING) == test_data[idx]
+
+    cleanup_tests_data()
+
+
+def test_cli_store_multi_image_stdin():
+    """
+    Store multiple image files via stdin
+    """
+
+    cleanup_tests_data()
+    for data in IMAGE_FILES:
+        with open(data, "rb") as f:
+            cmd_result = cmd_runner.invoke(
+                cmd, ["--cache-path", CACHE_PATH, "store"], input=f.read()
+            )
+            assert cmd_result.exit_code == 0
+
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(IMAGE_FILES)
+    for idx, db_result in enumerate(db_result):
+        # checked in the order they were added
+        with open(IMAGE_FILES[idx], "rb") as f:
+            assert decode(db_result[1])["data"] == f.read()
 
     cleanup_tests_data()
