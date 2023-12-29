@@ -120,7 +120,7 @@ def test_cli_store_text_stdin():
         ).fetchone()
 
         # STDIN is encoded as bytes since we can pipe binary data to it.
-        assert decode(result[0])["data"].decode() == test_data
+        assert decode(result[0])["data"].decode(ENCODING) == test_data
 
     cleanup_tests_data()
 
@@ -145,5 +145,31 @@ def test_cli_store_image_stdin():
         ).fetchone()
 
         assert decode(result[0])["data"] == test_data
+
+    cleanup_tests_data()
+
+
+def test_cli_store_multi_text_stdin():
+    """
+    Store multiple texts via stdin
+    """
+
+    test_data = ["foo", "bar", "baz", "bat", "cat", "mat", "sat", "rat", "pat", "hack"]
+
+    cleanup_tests_data()
+    for data in test_data:
+        cmd_result = cmd_runner.invoke(
+            cmd, ["--cache-path", CACHE_PATH, "store"], input=data
+        )
+        assert cmd_result.exit_code == 0
+
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(test_data)
+    for idx, db_result in enumerate(db_result):
+        # checked in the order they were added
+        assert decode(db_result[1])["data"].decode(ENCODING) == test_data[idx]
 
     cleanup_tests_data()
