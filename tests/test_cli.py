@@ -86,6 +86,19 @@ def test_cli_version():
     )
 
 
+def test_cli_store_empty():
+    """
+    Attempt to call `store` command without any arguments or data from stdin
+    """
+
+    cleanup_tests_data()
+
+    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store"])
+    assert result.exit_code == 10
+    assert result.output == "Nothing to store\n"
+    cleanup_tests_data()
+
+
 def test_cli_store_text_arg():
     """
     Store text via argument

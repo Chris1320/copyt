@@ -87,17 +87,23 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
     """
 
     copyt_api = api.API(global_options)
+
+    # data from argument
     if data is not None:
         copyt_api.store(data)
         copyt_api.close(commit=True)
+        raise typer.Exit(0)
 
-    elif not sys.stdin.buffer.isatty():
-        copyt_api.store(sys.stdin.buffer.read())
-        copyt_api.close(commit=True)
+    # data from stdin
+    if not sys.stdin.buffer.isatty():
+        stdin_data = sys.stdin.buffer.read()
+        if len(stdin_data) > 0:
+            copyt_api.store(stdin_data)
+            copyt_api.close(commit=True)
+            raise typer.Exit(0)
 
-    else:
-        typer.echo("Nothing to store", err=True)
-        raise typer.Exit(10)
+    typer.echo("Nothing to store", err=True)
+    raise typer.Exit(10)
 
 
 @cmd.command(name="list", help="Get a list of all stored items")
