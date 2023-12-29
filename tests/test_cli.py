@@ -38,6 +38,7 @@ ENCODING = "utf-8"
 CACHE_PATH = "./tests_data/copyt"
 DB_FILE = os.path.join(CACHE_PATH, "history.db")
 
+TEST_TEXTS = ["foo", "bar", "baz", "bat", "cat", "mat", "sat", "rat", "pat", "hack"]
 IMAGE_FILES = [
     "./tests_data/assets/pomeranian-pup.jpg",
     "./tests_data/assets/cat-1369563348jT2.jpg",
@@ -173,10 +174,8 @@ def test_cli_store_multi_text_stdin():
     Store multiple texts via stdin
     """
 
-    test_data = ["foo", "bar", "baz", "bat", "cat", "mat", "sat", "rat", "pat", "hack"]
-
     cleanup_tests_data()
-    for data in test_data:
+    for data in TEST_TEXTS:
         cmd_result = cmd_runner.invoke(
             cmd, ["--cache-path", CACHE_PATH, "store"], input=data
         )
@@ -186,10 +185,10 @@ def test_cli_store_multi_text_stdin():
         cur = conn.cursor()
         db_result = cur.execute("SELECT * FROM clipboard").fetchall()
 
-    assert len(db_result) == len(test_data)
+    assert len(db_result) == len(TEST_TEXTS)
     for idx, db_result in enumerate(db_result):
         # checked in the order they were added
-        assert decode(db_result[1]).content.decode(ENCODING) == test_data[idx]
+        assert decode(db_result[1]).content.decode(ENCODING) == TEST_TEXTS[idx]
 
     cleanup_tests_data()
 
@@ -216,5 +215,29 @@ def test_cli_store_multi_image_stdin():
         # checked in the order they were added
         with open(IMAGE_FILES[idx], "rb") as f:
             assert decode(db_result[1]).content == f.read()
+
+    cleanup_tests_data()
+
+
+def test_cli_list_text_arg():
+    """
+    List command with data from argument
+    """
+
+    cleanup_tests_data()
+    for data in TEST_TEXTS:
+        cmd_txt_input_result = cmd_runner.invoke(
+            cmd, ["--cache-path", CACHE_PATH, "store", data]
+        )
+        assert cmd_txt_input_result.exit_code == 0
+
+    cmd_result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "list"])
+
+    expected_output = ""
+    for idx, data in enumerate(TEST_TEXTS):
+        expected_output += f"[{idx + 1}]\t{data}\n"
+
+    assert cmd_result.exit_code == 0
+    assert cmd_result.output == expected_output
 
     cleanup_tests_data()
