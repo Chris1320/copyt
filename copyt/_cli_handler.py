@@ -25,6 +25,7 @@ SOFTWARE.
 """
 
 
+import json
 import os
 import pathlib
 import sys
@@ -51,8 +52,8 @@ global_options: GlobalOptions = GlobalOptions(
 
 
 @cmd.callback()
-def main_callback(
-    json: bool = global_options.json,
+def main_callback(  # pylint: disable=R0913
+    json_output: Annotated[bool, typer.Option("--json")] = global_options.json,
     max_items: int = global_options.max_items,
     max_item_size: int = global_options.max_item_size_in_bytes,
     verbose: bool = global_options.verbose,
@@ -63,7 +64,7 @@ def main_callback(
     Setup global options
     """
 
-    global_options.json = json
+    global_options.json = json_output
     global_options.max_items = max_items
     global_options.max_item_size_in_bytes = max_item_size
     global_options.verbose = verbose
@@ -77,7 +78,12 @@ def cmd_version():
     Show the version and exit
     """
 
-    print(f"{info.NAME} v{'.'.join(map(str,info.VERSION))}")
+    print(
+        json.dumps({"name": info.NAME, "version": info.VERSION})
+        if global_options.json
+        else f"{info.NAME} v{'.'.join(map(str,info.VERSION))}"
+    )
+
     raise typer.Exit(0)
 
 
