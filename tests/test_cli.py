@@ -237,7 +237,7 @@ def test_cli_list_text_arg():
 
     expected_output = ""
     for idx, data in enumerate(TEST_TEXTS):
-        expected_output += f"[{idx + 1}]\t{data}\n"
+        expected_output += f"{idx + 1}\t{data}\n"
 
     assert cmd_result.exit_code == 0
     assert cmd_result.output == expected_output
