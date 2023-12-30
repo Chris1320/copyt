@@ -95,7 +95,7 @@ def test_cli_store_empty():
 
     cleanup_tests_data()
 
-    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store"])
+    result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "store"])
     assert result.exit_code == 10
     assert result.output == "Nothing to store\n"
     cleanup_tests_data()
@@ -109,7 +109,7 @@ def test_cli_store_text_arg():
     test_data = "Another quick brown fox jumps over the lazy dog."
 
     cleanup_tests_data()
-    result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "store", test_data])
+    result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "store", test_data])
     assert result.exit_code == 0
     with sqlite3.connect(DB_FILE) as conn:
         cur = conn.cursor()
@@ -131,7 +131,7 @@ def test_cli_store_text_stdin():
 
     cleanup_tests_data()
     result = cmd_runner.invoke(
-        cmd, ["--cache-path", CACHE_PATH, "store"], input=test_data
+        cmd, ["--cache-dir", CACHE_PATH, "store"], input=test_data
     )
     assert result.exit_code == 0
     with sqlite3.connect(DB_FILE) as conn:
@@ -156,7 +156,7 @@ def test_cli_store_image_stdin():
 
     cleanup_tests_data()
     result = cmd_runner.invoke(
-        cmd, ["--cache-path", CACHE_PATH, "store"], input=test_data
+        cmd, ["--cache-dir", CACHE_PATH, "store"], input=test_data
     )
     assert result.exit_code == 0
     with sqlite3.connect(DB_FILE) as conn:
@@ -178,7 +178,7 @@ def test_cli_store_multi_text_stdin():
     cleanup_tests_data()
     for data in TEST_TEXTS:
         cmd_result = cmd_runner.invoke(
-            cmd, ["--cache-path", CACHE_PATH, "store"], input=data
+            cmd, ["--cache-dir", CACHE_PATH, "store"], input=data
         )
         assert cmd_result.exit_code == 0
 
@@ -203,7 +203,7 @@ def test_cli_store_multi_image_stdin():
     for data in IMAGE_FILES:
         with open(data, "rb") as f:
             cmd_result = cmd_runner.invoke(
-                cmd, ["--cache-path", CACHE_PATH, "store"], input=f.read()
+                cmd, ["--cache-dir", CACHE_PATH, "store"], input=f.read()
             )
             assert cmd_result.exit_code == 0
 
@@ -228,11 +228,11 @@ def test_cli_list_text_arg():
     cleanup_tests_data()
     for data in TEST_TEXTS:
         cmd_txt_input_result = cmd_runner.invoke(
-            cmd, ["--cache-path", CACHE_PATH, "store", data]
+            cmd, ["--cache-dir", CACHE_PATH, "store", data]
         )
         assert cmd_txt_input_result.exit_code == 0
 
-    cmd_result = cmd_runner.invoke(cmd, ["--cache-path", CACHE_PATH, "list"])
+    cmd_result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "list"])
 
     expected_output = ""
     for idx, data in enumerate(TEST_TEXTS):

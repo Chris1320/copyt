@@ -53,12 +53,18 @@ global_options: GlobalOptions = GlobalOptions(
 
 @cmd.callback()
 def main_callback(  # pylint: disable=R0913
-    json_output: Annotated[bool, typer.Option("--json")] = global_options.json,
-    max_items: int = global_options.max_items,
-    max_item_size: int = global_options.max_item_size_in_bytes,
-    verbose: bool = global_options.verbose,
-    cache_path: Optional[str] = None,
-    text_encoding: str = global_options.text_encoding,
+    json_output: Annotated[bool, typer.Option("--json", "-j")] = global_options.json,
+    max_items: Annotated[
+        int, typer.Option("--max-items", "-m")
+    ] = global_options.max_items,
+    max_item_size: Annotated[
+        int, typer.Option("--max-item-size", "-s")
+    ] = global_options.max_item_size_in_bytes,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v")] = global_options.verbose,
+    cache_dir: Annotated[Optional[str], typer.Option("--cache-dir", "-c")] = None,
+    text_encoding: Annotated[
+        str, typer.Option("--encoding", "-e")
+    ] = global_options.text_encoding,
 ):
     """
     Setup global options
@@ -68,7 +74,7 @@ def main_callback(  # pylint: disable=R0913
     global_options.max_items = max_items
     global_options.max_item_size_in_bytes = max_item_size
     global_options.verbose = verbose
-    global_options.cache_dir = cache_path or global_options.cache_dir
+    global_options.cache_dir = cache_dir or global_options.cache_dir
     global_options.text_encoding = text_encoding
 
 
