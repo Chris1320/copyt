@@ -128,7 +128,7 @@ def cmd_list(
     output_format: Annotated[
         str,
         typer.Option(help="Set a custom format of the output."),
-    ] = "[{id}]\t{content}"
+    ] = "{id}\t{content}"
 ):
     """
     Get a list of all stored items
