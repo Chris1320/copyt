@@ -141,8 +141,7 @@ def test_cli_store_text_stdin():
             "SELECT value FROM clipboard WHERE key = ?", ("1",)
         ).fetchone()
 
-        # STDIN is encoded as bytes since we can pipe binary data to it.
-        assert decode(result[0]).content.decode(ENCODING) == test_data
+        assert decode(result[0]).content == test_data
 
     cleanup_tests_data()
 
@@ -190,7 +189,7 @@ def test_cli_store_multi_text_stdin():
     assert len(db_result) == len(TEST_TEXTS)
     for idx, db_result in enumerate(db_result):
         # checked in the order they were added
-        assert decode(db_result[1]).content.decode(ENCODING) == TEST_TEXTS[idx]
+        assert decode(db_result[1]).content == TEST_TEXTS[idx]
 
     cleanup_tests_data()
 

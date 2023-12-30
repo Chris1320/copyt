@@ -112,6 +112,14 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
     if not sys.stdin.buffer.isatty():
         stdin_data = sys.stdin.buffer.read()
         if len(stdin_data) > 0:
+            # check if stdin data is text
+            try:
+                # if magic.from_buffer(stdin_data, mime=True).startswith("text/"):
+                stdin_data = stdin_data.decode(global_options.text_encoding)
+
+            except UnicodeDecodeError:  # data is not text
+                pass
+
             copyt_api.store(stdin_data)
             copyt_api.close(commit=True)
             raise typer.Exit(0)
