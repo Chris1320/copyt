@@ -116,3 +116,12 @@ class API:
         """
 
         return self.db_manager.get_all()
+
+    def get_record_from_id(self, item_id: int) -> ClipboardRecord:
+        """
+        Get a record from an ID.
+
+        :param int item_id: The ID of the item to get.
+        """
+
+        return self.db_manager.query(item_id)

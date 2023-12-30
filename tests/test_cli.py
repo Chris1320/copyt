@@ -245,6 +245,57 @@ def test_cli_list_text_arg():
     cleanup_tests_data()
 
 
+def test_cli_get_text_arg():
+    """
+    Get a text from the database via argument
+    """
+
+    cleanup_tests_data()
+
+    # add test data
+    for data in TEST_TEXTS:
+        cmd_txt_input_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "store", data]
+        )
+        assert cmd_txt_input_result.exit_code == 0
+
+    # get test data
+    for idx, test_data in enumerate(TEST_TEXTS):
+        cmd_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "get", str(idx + 1)]
+        )
+
+        assert cmd_result.exit_code == 0
+        assert cmd_result.output == test_data
+
+    cleanup_tests_data()
+
+
+def test_cli_get_text_stdin():
+    """
+    Get a text from the database via stdin
+    """
+
+    cleanup_tests_data()
+
+    # add test data
+    for data in TEST_TEXTS:
+        cmd_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "store"], input=data
+        )
+        assert cmd_result.exit_code == 0
+
+    # get test data
+    for idx, test_data in enumerate(TEST_TEXTS):
+        cmd_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "get"], input=str(idx + 1)
+        )
+        assert cmd_result.exit_code == 0
+        assert cmd_result.output == test_data
+
+    cleanup_tests_data()
+
+
 def test_cli_version_json():
     """
     Test the version command with json output

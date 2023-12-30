@@ -25,6 +25,7 @@ SOFTWARE.
 """
 
 
+import base64
 import json
 import os
 import pathlib
@@ -155,10 +156,85 @@ def cmd_list(
     raise typer.Exit(0)
 
 
-@cmd.command(name="decode", help="Get something from the clipboard")
-def cmd_decode(something: Annotated[Optional[str], typer.Argument()] = None):
-    # TODO
-    print(f"command: decode `{something}` from clipboard")
+@cmd.command(name="get")
+def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
+    """
+    Get something from the clipboard
+    """
+
+    copyt_api = api.API(global_options)
+    item_id_int: Optional[int] = None
+
+    # data from argument
+    if item_id is not None:
+        try:
+            item_id_int = int(item_id)
+
+        except ValueError as e:
+            if global_options.json:
+                print(json.dumps({"error": "Invalid item ID"}))
+
+            else:
+                typer.echo("Invalid item ID", err=True)
+
+            raise typer.Exit(10) from e
+
+    # data from stdin
+    if not sys.stdin.buffer.isatty():
+        stdin_data = sys.stdin.buffer.read()
+        if len(stdin_data) > 0:
+            try:
+                item_id_int = int(stdin_data)
+
+            except ValueError as e:
+                if global_options.json:
+                    print(json.dumps({"error": "Invalid item ID"}))
+
+                else:
+                    typer.echo("Invalid item ID", err=True)
+
+                raise typer.Exit(10) from e
+
+    try:
+        if item_id_int is not None:
+            result = copyt_api.get_record_from_id(item_id_int)
+            if global_options.json:
+                print(
+                    json.dumps(
+                        {
+                            "timestamp": result.timestamp.timestamp(),
+                            # DOCS: we should probably document that `get` shows
+                            # base64-encoded content if it's not a string
+                            "content": result.content
+                            if isinstance(result.content, str)
+                            else base64.b64encode(result.content).decode(
+                                global_options.text_encoding
+                            ),
+                        }
+                    ),
+                    end="",
+                )
+
+            else:
+                print(result.content, end="")
+
+            raise typer.Exit(0)
+
+    except KeyError as e:
+        if global_options.json:
+            print(
+                json.dumps(
+                    {
+                        "error": "There are no records in history with the specified item ID"
+                    }
+                )
+            )
+        else:
+            typer.echo(
+                "There are no records in history with the specified item ID", err=True
+            )
+
+        raise typer.Exit(10) from e
 
 
 @cmd.command(name="delete", help="Delete something from the clipboard")
