@@ -245,10 +245,66 @@ def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
         raise typer.Exit(10) from e
 
 
-@cmd.command(name="delete", help="Delete something from the clipboard")
-def cmd_delete(something: Annotated[Optional[str], typer.Argument()] = None):
-    # TODO
-    print(f"command: delete `{something}` from clipboard")
+@cmd.command(name="delete")
+def cmd_delete(item_id: Annotated[Optional[str], typer.Argument()] = None):
+    """
+    Delete something from the clipboard
+    """
+
+    copyt_api = api.API(global_options)
+    item_id_int: Optional[int] = None
+
+    # data from argument
+    if item_id is not None:
+        try:
+            item_id_int = int(item_id)
+
+        except ValueError as e:
+            if global_options.json:
+                print(json.dumps({"error": "Invalid item ID"}))
+
+            else:
+                typer.echo("Invalid item ID", err=True)
+
+            raise typer.Exit(10) from e
+
+    # data from stdin
+    if not sys.stdin.buffer.isatty():
+        stdin_data = sys.stdin.buffer.read()
+        if len(stdin_data) > 0:
+            try:
+                item_id_int = int(stdin_data)
+
+            except ValueError as e:
+                if global_options.json:
+                    print(json.dumps({"error": "Invalid item ID"}))
+
+                else:
+                    typer.echo("Invalid item ID", err=True)
+
+                raise typer.Exit(10) from e
+
+    try:
+        if item_id_int is not None:
+            copyt_api.remove(item_id_int)
+            copyt_api.close(commit=True)
+            raise typer.Exit(0)
+
+    except KeyError as e:
+        if global_options.json:
+            print(
+                json.dumps(
+                    {
+                        "error": "There are no records in history with the specified item ID"
+                    }
+                )
+            )
+        else:
+            typer.echo(
+                "There are no records in history with the specified item ID", err=True
+            )
+
+        raise typer.Exit(10) from e
 
 
 @cmd.command(name="wipe")

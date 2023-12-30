@@ -295,6 +295,68 @@ def test_cli_get_text_stdin():
     cleanup_tests_data()
 
 
+def test_cli_delete_text_arg():
+    """
+    Remove a text from the database via arguments
+    """
+
+    td = ("foo", "bar", "baz")
+
+    cleanup_tests_data()
+
+    # add test data
+    for data in td:
+        cmd_store_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "store"], input=data
+        )
+        assert cmd_store_result.exit_code == 0
+
+    # delete test data
+    cmd_delete_result = cmd_runner.invoke(
+        cmd, ["--cache-dir", CACHE_PATH, "delete", "2"]
+    )
+    assert cmd_delete_result.exit_code == 0
+
+    # get remaining test data
+    cmd_result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "list"])
+
+    assert cmd_result.exit_code == 0
+    assert cmd_result.output == "1\tfoo\n3\tbaz\n"
+
+    cleanup_tests_data()
+
+
+def test_cli_delete_text_stdin():
+    """
+    Remove a text from the database via stdin
+    """
+
+    td = ("foo", "bar", "baz")
+
+    cleanup_tests_data()
+
+    # add test data
+    for data in td:
+        cmd_store_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "store"], input=data
+        )
+        assert cmd_store_result.exit_code == 0
+
+    # delete test data
+    cmd_delete_result = cmd_runner.invoke(
+        cmd, ["--cache-dir", CACHE_PATH, "delete"], input="2"
+    )
+    assert cmd_delete_result.exit_code == 0
+
+    # get remaining test data
+    cmd_result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "list"])
+
+    assert cmd_result.exit_code == 0
+    assert cmd_result.output == "1\tfoo\n3\tbaz\n"
+
+    cleanup_tests_data()
+
+
 def test_cli_version_json():
     """
     Test the version command with json output
