@@ -28,6 +28,7 @@ import os
 import pickle
 import shutil
 import sqlite3
+from typing import Any
 
 from typer.testing import CliRunner
 
@@ -58,7 +59,7 @@ def cleanup_tests_data():
             shutil.rmtree(os.path.join("./tests_data", path))
 
 
-def encode(data):
+def encode(data: Any):
     """
     How sqlitedict encodes data
     """
@@ -66,7 +67,7 @@ def encode(data):
     return sqlite3.Binary(pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL))
 
 
-def decode(data):
+def decode(data: Any):
     """
     How sqlitedict decodes data
     """
