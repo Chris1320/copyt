@@ -115,7 +115,11 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
             copyt_api.close(commit=True)
             raise typer.Exit(0)
 
-    typer.echo("Nothing to store", err=True)
+    if global_options.json:
+        print(json.dumps({"error": "Nothing to store"}))
+    else:
+        typer.echo("Nothing to store", err=True)
+
     raise typer.Exit(10)
 
 

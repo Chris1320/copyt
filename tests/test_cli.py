@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import json
 import os
 import pickle
 import shutil
@@ -241,4 +242,31 @@ def test_cli_list_text_arg():
     assert cmd_result.exit_code == 0
     assert cmd_result.output == expected_output
 
+    cleanup_tests_data()
+
+
+def test_cli_version_json():
+    """
+    Test the version command with json output
+    """
+
+    result = cmd_runner.invoke(cmd, ["--json", "version"])
+    assert result.exit_code == 0
+    assert (
+        result.output
+        == json.dumps({"name": copyt_info.NAME, "version": copyt_info.VERSION}) + "\n"
+    )
+
+
+def test_cli_store_empty_json():
+    """
+    Attempt to call `store` command without any
+    arguments or data from stdin with json output
+    """
+
+    cleanup_tests_data()
+
+    result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "--json", "store"])
+    assert result.exit_code == 10
+    assert result.output == json.dumps({"error": "Nothing to store"}) + "\n"
     cleanup_tests_data()
