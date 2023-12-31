@@ -382,3 +382,25 @@ def test_cli_store_empty_json():
     assert result.exit_code == 10
     assert result.output == json.dumps({"error": "Nothing to store"}) + "\n"
     cleanup_tests_data()
+
+
+def test_cli_list_text_arg_json():
+    """
+    List command with data from argument with json output
+    """
+
+    cleanup_tests_data()
+    for data in TEST_TEXTS:
+        cmd_txt_input_result = cmd_runner.invoke(
+            cmd, ["--cache-dir", CACHE_PATH, "--json", "store", data]
+        )
+        assert cmd_txt_input_result.exit_code == 0
+
+    cmd_result = cmd_runner.invoke(cmd, ["--cache-dir", CACHE_PATH, "--json", "list"])
+    assert cmd_result.exit_code == 0
+
+    for idx, data in enumerate(json.loads(cmd_result.output)):
+        assert str(idx + 1) == data[0]
+        assert TEST_TEXTS[idx] == data[1]["content"]
+
+    cleanup_tests_data()
