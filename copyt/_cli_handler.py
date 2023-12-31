@@ -145,6 +145,28 @@ def cmd_list(
 
     copyt_api = api.API(global_options)
     hist_list = copyt_api.get_history_list()
+    copyt_api.close()
+    if global_options.json:
+        print(
+            json.dumps(
+                [
+                    [
+                        item_id,
+                        {
+                            "timestamp": data.timestamp.timestamp(),
+                            "content": data.content
+                            if isinstance(data.content, str)
+                            else base64.b64encode(data.content).decode(
+                                global_options.text_encoding
+                            ),
+                        },
+                    ]
+                    for item_id, data in hist_list
+                ]
+            )
+        )
+        raise typer.Exit(0)
+
     for item_id, data in hist_list:
         print(
             # DOCS: document the behavior of this
@@ -158,8 +180,6 @@ def cmd_list(
                 timestamp=data.timestamp.timestamp,
             )
         )
-
-    copyt_api.close()
 
     raise typer.Exit(0)
 
