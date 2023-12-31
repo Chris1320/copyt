@@ -224,7 +224,20 @@ def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
                 )
 
             else:
-                print(result.content, end="")
+                if isinstance(result.content, str):
+                    sys.stdout.write(result.content)
+                    sys.stdout.flush()
+
+                elif sys.stdout.buffer.writable():
+                    sys.stdout.buffer.write(result.content)
+                    sys.stdout.buffer.flush()
+
+                else:
+                    typer.echo(
+                        "The content of the item is not a string and stdout is not writable",
+                        err=True,
+                    )
+                    raise typer.Exit(11)
 
             raise typer.Exit(0)
 
