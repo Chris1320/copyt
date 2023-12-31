@@ -25,6 +25,8 @@ SOFTWARE.
 """
 
 import pathlib
+import sys
+from typing import Optional
 
 
 def get_program_cache_dir(cache_dir: str | pathlib.Path) -> pathlib.Path:
@@ -36,3 +38,21 @@ def get_program_cache_dir(cache_dir: str | pathlib.Path) -> pathlib.Path:
     """
 
     return pathlib.Path(cache_dir, "copyt")
+
+
+def get_input_from_arg_or_stdin(arg: Optional[str] = None) -> str | bytes | None:
+    """
+    Get input from argument or stdin. Argument takes precedence over stdin.
+
+    :param Optional[str] arg: The argument to get the input from.
+    """
+
+    if arg is not None:
+        return arg
+
+    if not sys.stdin.buffer.isatty():
+        stdin_data = sys.stdin.buffer.read()
+        if len(stdin_data) > 0:
+            return stdin_data
+
+    return None

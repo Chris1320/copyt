@@ -170,76 +170,66 @@ def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
     Get something from the clipboard
     """
 
-    copyt_api = api.API(global_options)
-    item_id_int: Optional[int] = None
-
-    # data from argument
-    if item_id is not None:
-        try:
-            item_id_int = int(item_id)
-
-        except ValueError as e:
-            if global_options.json:
-                print(json.dumps({"error": "Invalid item ID"}))
-
-            else:
-                typer.echo("Invalid item ID", err=True)
-
-            raise typer.Exit(10) from e
-
-    # data from stdin
-    if not sys.stdin.buffer.isatty():
-        stdin_data = sys.stdin.buffer.read()
-        if len(stdin_data) > 0:
-            try:
-                item_id_int = int(stdin_data)
-
-            except ValueError as e:
-                if global_options.json:
-                    print(json.dumps({"error": "Invalid item ID"}))
-
-                else:
-                    typer.echo("Invalid item ID", err=True)
-
-                raise typer.Exit(10) from e
-
     try:
-        if item_id_int is not None:
-            result = copyt_api.get_record_from_id(item_id_int)
+        user_input = helpers.get_input_from_arg_or_stdin(item_id)
+        if user_input is None:
             if global_options.json:
-                print(
-                    json.dumps(
-                        {
-                            "timestamp": result.timestamp.timestamp(),
-                            # DOCS: we should probably document that `get` shows
-                            # base64-encoded content if it's not a string
-                            "content": result.content
-                            if isinstance(result.content, str)
-                            else base64.b64encode(result.content).decode(
-                                global_options.text_encoding
-                            ),
-                        }
-                    ),
-                    end="",
-                )
+                print(json.dumps({"error": "No item ID specified"}))
 
             else:
-                if isinstance(result.content, str):
-                    sys.stdout.write(result.content)
-                    sys.stdout.flush()
+                typer.echo("No item ID specified", err=True)
 
-                elif sys.stdout.buffer.writable():
-                    sys.stdout.buffer.write(result.content)
-                    sys.stdout.buffer.flush()
+            raise typer.Exit(10)
 
-                else:
-                    typer.echo(
-                        "The content of the item is not a string and stdout is not writable",
-                        err=True,
-                    )
-                    raise typer.Exit(11)
+        item_id_int = int(
+            user_input.decode(global_options.text_encoding)
+            if isinstance(user_input, bytes)
+            else user_input
+        )
 
+        result = api.API(global_options).get_record_from_id(item_id_int)
+        if global_options.json:
+            print(
+                json.dumps(
+                    {
+                        "timestamp": result.timestamp.timestamp(),
+                        # DOCS: we should probably document that `get` shows
+                        # base64-encoded content if it's not a string
+                        "content": result.content
+                        if isinstance(result.content, str)
+                        else base64.b64encode(result.content).decode(
+                            global_options.text_encoding
+                        ),
+                    }
+                ),
+                end="",
+            )
             raise typer.Exit(0)
+
+        if isinstance(result.content, str):
+            sys.stdout.write(result.content)
+            sys.stdout.flush()
+            raise typer.Exit(0)
+
+        if sys.stdout.buffer.writable():
+            sys.stdout.buffer.write(result.content)
+            sys.stdout.buffer.flush()
+            raise typer.Exit(0)
+
+        typer.echo(
+            "The content of the item is not a string and stdout is not writable",
+            err=True,
+        )
+        raise typer.Exit(11)
+
+    except ValueError as e:
+        if global_options.json:
+            print(json.dumps({"error": "Invalid item ID"}))
+
+        else:
+            typer.echo("Invalid item ID", err=True)
+
+        raise typer.Exit(10) from e
 
     except KeyError as e:
         if global_options.json:
@@ -252,7 +242,8 @@ def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
             )
         else:
             typer.echo(
-                "There are no records in history with the specified item ID", err=True
+                "There are no records in history with the specified item ID",
+                err=True,
             )
 
         raise typer.Exit(10) from e
