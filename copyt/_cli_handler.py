@@ -136,7 +136,7 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
 def cmd_list(
     output_format: Annotated[
         str,
-        typer.Option(help="Set a custom format of the output."),
+        typer.Option(help="Set a custom format of the output"),
     ] = "{id}\t{content}"
 ):
     """
@@ -316,5 +316,5 @@ def cmd_wipe():
     copyt_api = api.API(global_options)
     copyt_api.wipe()
     copyt_api.close(commit=True)
-    typer.echo("Wiped the clipboard history.")
+    typer.echo("Wiped the clipboard history")
     raise typer.Exit(0)
