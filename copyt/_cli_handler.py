@@ -255,44 +255,35 @@ def cmd_delete(item_id: Annotated[Optional[str], typer.Argument()] = None):
     Delete something from the clipboard
     """
 
-    copyt_api = api.API(global_options)
-    item_id_int: Optional[int] = None
-
-    # data from argument
-    if item_id is not None:
-        try:
-            item_id_int = int(item_id)
-
-        except ValueError as e:
+    try:
+        user_input = helpers.get_input_from_arg_or_stdin(item_id)
+        if user_input is None:
             if global_options.json:
-                print(json.dumps({"error": "Invalid item ID"}))
+                print(json.dumps({"error": "No item ID specified"}))
 
             else:
-                typer.echo("Invalid item ID", err=True)
+                typer.echo("No item ID specified", err=True)
 
-            raise typer.Exit(10) from e
+            raise typer.Exit(10)
 
-    # data from stdin
-    if not sys.stdin.buffer.isatty():
-        stdin_data = sys.stdin.buffer.read()
-        if len(stdin_data) > 0:
-            try:
-                item_id_int = int(stdin_data)
+        copyt_api = api.API(global_options)
+        copyt_api.remove(
+            int(
+                user_input.decode(global_options.text_encoding)
+                if isinstance(user_input, bytes)
+                else user_input
+            )
+        )
+        copyt_api.close(commit=True)
 
-            except ValueError as e:
-                if global_options.json:
-                    print(json.dumps({"error": "Invalid item ID"}))
+    except ValueError as e:
+        if global_options.json:
+            print(json.dumps({"error": "Invalid item ID"}))
 
-                else:
-                    typer.echo("Invalid item ID", err=True)
+        else:
+            typer.echo("Invalid item ID", err=True)
 
-                raise typer.Exit(10) from e
-
-    try:
-        if item_id_int is not None:
-            copyt_api.remove(item_id_int)
-            copyt_api.close(commit=True)
-            raise typer.Exit(0)
+        raise typer.Exit(10) from e
 
     except KeyError as e:
         if global_options.json:
@@ -305,7 +296,8 @@ def cmd_delete(item_id: Annotated[Optional[str], typer.Argument()] = None):
             )
         else:
             typer.echo(
-                "There are no records in history with the specified item ID", err=True
+                "There are no records in history with the specified item ID",
+                err=True,
             )
 
         raise typer.Exit(10) from e
