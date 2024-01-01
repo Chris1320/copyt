@@ -95,12 +95,45 @@ def cmd_version():
 
 
 @cmd.command(name="store")
-def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
+def cmd_store(
+    data: Annotated[Optional[str], typer.Argument(help="The data to store")] = None,
+    bypass_clipboard_state: Annotated[
+        bool,
+        typer.Option(
+            "--bypass",
+            "-b",
+            help="Save data regardless of the state of CLIPBOARD_STATE",
+            is_flag=True,
+        ),
+    ] = False,
+):
     """
     Store something in the clipboard
     """
 
     copyt_api = api.API(global_options)
+    clipboard_state = os.getenv("CLIPBOARD_STATE")
+
+    if not bypass_clipboard_state:
+        # https://man.archlinux.org/man/wl-copy.1#CLIPBOARD_STATE
+        if clipboard_state == "sensitive":
+            return  # do nothing
+
+        if clipboard_state == "clear":
+            copyt_api.remove_last()
+            copyt_api.close(commit=True)
+            raise typer.Exit(0)
+
+        if clipboard_state == "nil":
+            if global_options.json:
+                print(json.dumps({"error": "Nothing to store"}))
+
+            else:
+                typer.echo("Nothing to store", err=True)
+
+            raise typer.Exit(10)
+
+        # clipboard_state == "data"
 
     # data from argument
     if data is not None:
@@ -126,6 +159,7 @@ def cmd_store(data: Annotated[Optional[str], typer.Argument()] = None):
 
     if global_options.json:
         print(json.dumps({"error": "Nothing to store"}))
+
     else:
         typer.echo("Nothing to store", err=True)
 
