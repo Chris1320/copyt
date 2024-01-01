@@ -10,20 +10,20 @@ Usage: `copyt [OPTIONS] COMMAND [ARGS]...`
 
 ### Options
 
-| Long Form              | Short Form | Description                                                                           |
-| ---------------------- | ---------- | ------------------------------------------------------------------------------------- |
-| `--help`               |            | Show this message and exit.                                                           |
-|                        |            |                                                                                       |
-| `--max-items=<n>`      | `-m <n>`   | The amount of clipboard records to store in history. (default: `750`)                 |
-| `--max-item-size=<n>`  | `-s <n>`   | The maximum size of data to be allowed in the clipboard history. (default: `5242880`) |
-|                        |            |                                                                                       |
-| `--json`               | `-j`       | Show output in JSON.                                                                  |
-| `--verbose`            | `-v`       | Enable verbose mode.                                                                  |
-| `--encoding=<s>`       | `-e <s>`   | The text encoding to use. (default: `utf-8`)                                          |
-| `--cache-dir=<dir>`    | `-c <dir>` | Set a custom location for the history file. (default: `~/.cache/copyt`)               |
-|                        |            |                                                                                       |
-| `--install-completion` |            | Install completion for the current shell.                                             |
-| `--show-completion`    |            | Show completion for the current shell, to copy it or customize the installation.      |
+| Long Form              | Short Form | Description                                                                                      |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `--help`               |            | Show this message and exit.                                                                      |
+|                        |            |                                                                                                  |
+| `--max-items=<n>`      | `-m <n>`   | The amount of clipboard records to store in history. (default: `750`)                            |
+| `--max-item-size=<n>`  | `-s <n>`   | The maximum size (in bytes) of data to be allowed in the clipboard history. (default: `5242880`) |
+|                        |            |                                                                                                  |
+| `--json`               | `-j`       | Show output in JSON.                                                                             |
+| `--verbose`            | `-v`       | Enable verbose mode.                                                                             |
+| `--encoding=<s>`       | `-e <s>`   | The text encoding to use. (default: `utf-8`)                                                     |
+| `--cache-dir=<dir>`    | `-c <dir>` | Set a custom location for the history file. (default: `~/.cache/copyt`)                          |
+|                        |            |                                                                                                  |
+| `--install-completion` |            | Install completion for the current shell.                                                        |
+| `--show-completion`    |            | Show completion for the current shell, to copy it or customize the installation.                 |
 
 ### Commands
 

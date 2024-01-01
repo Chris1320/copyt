@@ -54,17 +54,36 @@ global_options: GlobalOptions = GlobalOptions(
 
 @cmd.callback()
 def main_callback(  # pylint: disable=R0913
-    json_output: Annotated[bool, typer.Option("--json", "-j")] = global_options.json,
+    json_output: Annotated[
+        bool, typer.Option("--json", "-j", is_flag=True, help="Show output in JSON")
+    ] = global_options.json,
     max_items: Annotated[
-        int, typer.Option("--max-items", "-m")
+        int,
+        typer.Option(
+            "--max-items",
+            "-m",
+            help="The amount of clipboard records to store in history",
+        ),
     ] = global_options.max_items,
     max_item_size: Annotated[
-        int, typer.Option("--max-item-size", "-s")
+        int,
+        typer.Option(
+            "--max-item-size",
+            "-s",
+            help="The maximum size (in bytes) of data to be allowed in the clipboard history",
+        ),
     ] = global_options.max_item_size_in_bytes,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v")] = global_options.verbose,
-    cache_dir: Annotated[Optional[str], typer.Option("--cache-dir", "-c")] = None,
+    verbose: Annotated[
+        bool, typer.Option("--verbose", "-v", is_flag=True, help="Enable verbose mode")
+    ] = global_options.verbose,
+    cache_dir: Annotated[
+        Optional[str],
+        typer.Option(
+            "--cache-dir", "-c", help="Set a custom location for the history file"
+        ),
+    ] = None,
     text_encoding: Annotated[
-        str, typer.Option("--encoding", "-e")
+        str, typer.Option("--encoding", "-e", help="The text encoding to use")
     ] = global_options.text_encoding,
 ):
     """
