@@ -45,7 +45,9 @@ class API:
         """
 
         self.global_options = global_options
-        self.db_manager = _db_manager.DBManager(self.history_file)
+        self.db_manager = _db_manager.DBManager(
+            self.history_file, max_items=self.global_options.max_items
+        )
 
     @property
     def history_file(self) -> pathlib.Path:

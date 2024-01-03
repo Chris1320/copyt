@@ -43,10 +43,12 @@ class DBManager:
         db_path: pathlib.Path,
         target: str = "clipboard",
         encoding: str = "utf-8",
+        max_items: int = 750,
     ):
         self._db_path = db_path
         self._target = target
         self.encoding = encoding
+        self.max_items = max_items
 
         os.makedirs(self._db_path.parent, exist_ok=True)
         self._db = SqliteDict(
@@ -59,16 +61,26 @@ class DBManager:
         Get the maximum index in the database.
         """
 
-        if len(tuple(self._db.keys())) > 0:  # type: ignore (we know keys are ints)
-            return max(map(int, self._db.keys()))  # type: ignore
+        if len(tuple(self._db)) > 0:
+            return max(map(int, self._db))
 
         return 0
+
+    def _enforce_max_items(self) -> None:
+        """
+        Enforce the maximum number of items in the database.
+        """
+
+        if len(self._db) > self.max_items:
+            for key in list(self._db.keys())[0 : len(self._db) - self.max_items]:  # type: ignore
+                del self._db[key]  # type: ignore
 
     def commit(self) -> None:
         """
         Commit changes to the database.
         """
 
+        self._enforce_max_items()
         self._db.commit()
 
     def close(self) -> None:
