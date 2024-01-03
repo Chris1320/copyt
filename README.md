@@ -51,7 +51,7 @@ copyt list  # list all stored data
 # 1       foo
 # 2       bar
 # 3       PNG image data, 1719 x 1920, 8-bit/color RGBA, non-interlaced
-# 4       {"foo": "bar"}
+# 4       {"spam": "eggs"}
 
 copyt get 2  # output: bar
 copyt get 3 > image-from-copyt.png  # output the stored image to file
