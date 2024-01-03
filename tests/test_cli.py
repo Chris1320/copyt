@@ -404,3 +404,70 @@ def test_cli_list_text_arg_json():
         assert TEST_TEXTS[idx] == data[1]["content"]
 
     cleanup_tests_data()
+
+
+def test_cli_clipboard_state():
+    """
+    Test how the clipboard state is respected
+    """
+
+    cleanup_tests_data()
+
+    # CLIPBOARD_STATE=data
+    for data in TEST_TEXTS:
+        cmd_result = cmd_runner.invoke(
+            cmd,
+            ["--cache-dir", CACHE_PATH, "store"],
+            input=data,
+            env={"CLIPBOARD_STATE": "data"},
+        )
+        assert cmd_result.exit_code == 0
+
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(TEST_TEXTS)
+
+    # CLIPBOARD_STATE=nil
+    cmd_result = cmd_runner.invoke(
+        cmd,
+        ["--cache-dir", CACHE_PATH, "store"],
+        env={"CLIPBOARD_STATE": "nil"},
+    )
+    assert cmd_result.exit_code == 10
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(TEST_TEXTS)
+
+    # CLIPBOARD_STATE=sensitive
+    sensitive_data = "My super secret password"
+    sensitive_cmd_result = cmd_runner.invoke(
+        cmd,
+        ["--cache-dir", CACHE_PATH, "store"],
+        input=sensitive_data,
+        env={"CLIPBOARD_STATE": "sensitive"},
+    )
+    assert sensitive_cmd_result.exit_code == 0
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(TEST_TEXTS)
+
+    # CLIPBOARD_STATE=clear
+    clear_cmd_result = cmd_runner.invoke(
+        cmd,
+        ["--cache-dir", CACHE_PATH, "store"],
+        env={"CLIPBOARD_STATE": "clear"},
+    )
+    assert clear_cmd_result.exit_code == 0
+    with sqlite3.connect(DB_FILE) as conn:
+        cur = conn.cursor()
+        db_result = cur.execute("SELECT * FROM clipboard").fetchall()
+
+    assert len(db_result) == len(TEST_TEXTS) - 1
+
+    cleanup_tests_data()
