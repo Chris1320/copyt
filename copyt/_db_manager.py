@@ -73,7 +73,7 @@ class DBManager:
 
         if len(self._db) > self.max_items:
             for key in list(self._db.keys())[0 : len(self._db) - self.max_items]:  # type: ignore
-                del self._db[key]  # type: ignore
+                del self._db[key]
 
     def commit(self) -> None:
         """
