@@ -43,7 +43,7 @@ cmd = typer.Typer()
 global_options: GlobalOptions = GlobalOptions(
     json=False,
     max_items=750,
-    max_item_size_in_bytes=1024 * 1024 * 5,  # 5MB
+    max_item_size_in_bytes=5000000,  # 5MB
     verbose=False,
     cache_dir=helpers.get_program_cache_dir(
         os.getenv("XDG_CACHE_HOME") or pathlib.Path(pathlib.Path.home(), ".cache")
@@ -188,10 +188,12 @@ def cmd_list(
                         item_id,
                         {
                             "timestamp": data.timestamp.timestamp(),
-                            "content": data.content
-                            if isinstance(data.content, str)
-                            else base64.b64encode(data.content).decode(
-                                global_options.text_encoding
+                            "content": (
+                                data.content
+                                if isinstance(data.content, str)
+                                else base64.b64encode(data.content).decode(
+                                    global_options.text_encoding
+                                )
                             ),
                         },
                     ]
@@ -207,9 +209,11 @@ def cmd_list(
             output_format.format(
                 id=item_id,
                 kind=magic.from_buffer(data.content, mime=True),
-                content=magic.from_buffer(data.content)
-                if isinstance(data.content, bytes)
-                else data.content,
+                content=(
+                    magic.from_buffer(data.content)
+                    if isinstance(data.content, bytes)
+                    else data.content
+                ),
                 size=len(data.content),
                 timestamp=data.timestamp.timestamp,
             )
@@ -249,10 +253,12 @@ def cmd_get(item_id: Annotated[Optional[str], typer.Argument()] = None):
                         "timestamp": result.timestamp.timestamp(),
                         # DOCS: we should probably document that `get` shows
                         # base64-encoded content if it's not a string
-                        "content": result.content
-                        if isinstance(result.content, str)
-                        else base64.b64encode(result.content).decode(
-                            global_options.text_encoding
+                        "content": (
+                            result.content
+                            if isinstance(result.content, str)
+                            else base64.b64encode(result.content).decode(
+                                global_options.text_encoding
+                            )
                         ),
                     }
                 ),
