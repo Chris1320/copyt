@@ -24,7 +24,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest==8.0.1",
-    "pytest-cov==4.1.0",
+    "pytest-cov==5.0.0",
     "pytest-benchmark==4.0.0"
 ]
 
