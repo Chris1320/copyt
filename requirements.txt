@@ -4,5 +4,5 @@ python-magic==0.4.27
 Nuitka==2.0.3
 pylint==3.0.3
 pytest==8.0.1
-pytest-cov==4.1.0
+pytest-cov==5.0.0
 pytest-benchmark==4.0.0
